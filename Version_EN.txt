@@ -1,0 +1,9 @@
+2020-08-05:  New 5.65inch F e-paper routine added
+2020-08-05：New 7.5inch HD e-Paper routine added
+2020-08-12：New 3.7inch  e-Paper routine added
+2020-08-12：New 2.66inch  e-Paper routine added
+2020-09-03：New 5.83inch B V2 e-Paper routine addad
+2020-09-03：New 2.9inch B V2 e-Paper routine addad
+2020-09-04：New 1.54inch B V2 e-Paper routine addad
+2020-09-04：New 2.13inch B V3 e-Paper routine addad
+2020-11-23：Updata 1.54inch V2 e-Paper routine.
