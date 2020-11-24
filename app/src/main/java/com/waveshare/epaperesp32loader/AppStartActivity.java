@@ -13,9 +13,11 @@ import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,6 +28,7 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 
 import com.waveshare.epaperesp32loader.communication.PermissionHelper;
 import com.waveshare.epaperesp32loader.image_processing.EPaperDisplay;
+import com.waveshare.epaperesp32loader.image_processing.EPaperPicture;
 
 /**
  * <h1>Main activity</h1>
@@ -46,6 +49,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import util.QRCodeUtil;
 
 public class AppStartActivity extends AppCompatActivity
 {
@@ -71,6 +76,11 @@ public class AppStartActivity extends AppCompatActivity
     public TextView textSend;
     public TextView textAddr;
     public Button button_file;
+    public EditText ed_url;
+    public EditText ed_width;
+    public EditText ed_height;
+    public Button btn_update_image;
+
 
     public ImageView pictFile; // View of loaded image
     public ImageView pictFilt; // View of filtered image
@@ -111,6 +121,11 @@ public class AppStartActivity extends AppCompatActivity
         pictFile = findViewById(R.id.pict_file);
         pictFilt = findViewById(R.id.pict_filt);
         button_file = findViewById(R.id.Button_file);
+        ed_url = findViewById(R.id.ed_url);
+        ed_width = findViewById(R.id.ed_width);
+        ed_height = findViewById(R.id.ed_height);
+        btn_update_image = findViewById(R.id.btn_update_image);
+        btn_update_image.setEnabled(false);
         // Data
         //-----------------------------
         originalImage = null;
@@ -189,6 +204,22 @@ public class AppStartActivity extends AppCompatActivity
         else startActivityForResult(
             new Intent(this, UploadActivity.class),
             REQ_UPLOADING);
+    }
+
+    public void onUpdateQRImage(View view) {
+        if (!TextUtils.isEmpty(ed_url.getText()) && !TextUtils.isEmpty(ed_width.getText()) && !TextUtils.isEmpty(ed_height.getText())) {
+            btn_update_image.setEnabled(true);
+        }
+        int width = Integer.valueOf(ed_width.getText().toString());
+        int height = Integer.valueOf(ed_height.getText().toString());
+
+        EPaperDisplay.epdInd = 14;
+        originalImage = QRCodeUtil.Create2DCode(ed_url.getText().toString(), width, height);
+        //调用黑白色阶处理算法生成目标bitmap
+        indTableImage = EPaperPicture.createIndexedImage(true, false);
+        startActivityForResult(
+                new Intent(this, UploadActivity.class),
+                REQ_UPLOADING);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

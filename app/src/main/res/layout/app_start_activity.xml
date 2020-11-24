@@ -68,6 +68,51 @@
             style="@style/txt"
             android:id="@+id/text_send"
             android:text="@string/nothing"/>
+
+        <View
+            style="@style/sepL"/>
+
+        <EditText
+            android:id="@+id/ed_url"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:hint="URL:"
+            android:ellipsize="end"/>
+
+        <android.support.v7.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <EditText
+                android:id="@+id/ed_width"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="Width:"
+                android:layout_weight="1"/>
+
+            <EditText
+                android:id="@+id/ed_height"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="Height:"
+                android:layout_weight="1"/>
+
+        </android.support.v7.widget.LinearLayoutCompat>
+
+        <Button
+            style="@style/btn"
+            android:id="@+id/btn_update_image"
+            android:text="Update QR Image"
+            android:textAllCaps="false"
+            android:onClick="onUpdateQRImage"/>
     </LinearLayout>
 
 </ScrollView>
