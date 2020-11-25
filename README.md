@@ -3,6 +3,7 @@
 
 ## 硬件：微雪蓝牙驱动板及电子墨水屏
 Android 开发文档参考：https://www.waveshare.net/wiki/E-Paper_ESP32_Driver_Board
+    
 Android 开发demo参考：https://www.waveshare.net/w/upload/5/50/E-Paper_ESP32_Driver_Board_Code.7z
 
 ## 预期调研实现以下功能：
