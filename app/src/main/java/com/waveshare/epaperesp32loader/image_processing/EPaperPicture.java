@@ -3,9 +3,6 @@ package com.waveshare.epaperesp32loader.image_processing;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
-import com.waveshare.epaperesp32loader.AppStartActivity;
-import com.waveshare.epaperesp32loader.DisplaysActivity;
-
 /**
  * <h1>Image filtering for e-Paper display</h1>
  * The class is intended for pixel data converting
@@ -109,11 +106,11 @@ public class EPaperPicture
     // is based on estimation how less the original pixel's area
     // differs from the palette's pixels (so called dithering).
     //---------------------------------------------------------
-    public static Bitmap createIndexedImage(boolean isLvl, boolean isRed)
+    public static Bitmap createIndexedImage(Bitmap orgbitmap, boolean isLvl, boolean isRed)
     {
         EPaperDisplay epd = EPaperDisplay.getDisplays()[EPaperDisplay.epdInd];
 
-        srcBmp = AppStartActivity.originalImage;
+        srcBmp = orgbitmap;
         dstBmp = Bitmap.createBitmap(epd.width, epd.height, srcBmp.getConfig());
 
         int palInd = epd.index;

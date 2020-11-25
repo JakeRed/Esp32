@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,11 +16,14 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.waveshare.epaperesp32loader.communication.BluetoothHelper;
 import com.waveshare.epaperesp32loader.image_processing.EPaperDisplay;
+import com.waveshare.epaperesp32loader.image_processing.EPaperPicture;
 
 import util.QRCodeUtil;
 
@@ -31,7 +35,9 @@ public class DemoActivity extends AppCompatActivity {
     @Nullable
     private Bitmap bitmap;
     private SocketHandler handler;
-    private TextView textView;
+    private TextView textView,tv_prefile;
+    private ImageView iv_bitmap;
+    private LinearLayout ll_bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -40,7 +46,12 @@ public class DemoActivity extends AppCompatActivity {
         setContentView(R.layout.app_demo_activity);
         text_blue = findViewById(R.id.text_blue);
         ed_url = findViewById(R.id.ed_url);
+        ll_bitmap = findViewById(R.id.ll_bitmap);
+        iv_bitmap = findViewById(R.id.iv_bitmap);
         textView = findViewById(R.id.upload_text);
+        tv_prefile = findViewById(R.id.tv_prefile);
+        tv_prefile.setVisibility(View.GONE);
+        ll_bitmap.setVisibility(View.GONE);
         textView.setText("Uploading: 0%");
         EPaperDisplay.epdInd = 14;
         ed_url.setText(EPaperDisplay.getDisplays()[EPaperDisplay.epdInd].title);
@@ -59,18 +70,38 @@ public class DemoActivity extends AppCompatActivity {
 
     /**
      * 上传
+     * 通过view 预览得到电子屏幕展示样式
+     * 后续要根据ui设计来做，现在没管线程问题，bitmap在主线程处理了
      */
     public void onUpdateQRImage(View view) {
         String result = ed_url.getText().toString();
         if (!TextUtils.isEmpty(result)){
             EPaperDisplay epd = EPaperDisplay.getDisplays()[EPaperDisplay.epdInd];
-            bitmap = QRCodeUtil.Create2DCode(result,epd.width,epd.height);
-            BluetoothHelper.initialize(DemoActivity.btDevice, handler = new SocketHandler());
-            if (!BluetoothHelper.connect() || !handler.init(bitmap))
-            {
-                Toast.makeText(this,"程序出错",Toast.LENGTH_LONG).show();
-                return;
-            }
+            Bitmap qr = QRCodeUtil.Create2DCode(result,epd.width,epd.height);
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) ll_bitmap.getLayoutParams();
+            layoutParams.height = epd.height;
+            layoutParams.width = epd.width;
+            ll_bitmap.setLayoutParams(layoutParams);
+            iv_bitmap.setImageBitmap(qr);
+            tv_prefile.setVisibility(View.VISIBLE);
+            ll_bitmap.setVisibility(View.VISIBLE);
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    Bitmap temp = Bitmap.createBitmap(
+                            ll_bitmap.getWidth(), ll_bitmap.getHeight(),
+                            Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(temp);
+                    ll_bitmap.draw(canvas);
+                    bitmap = EPaperPicture.createIndexedImage(temp,true, true);
+                    BluetoothHelper.initialize(DemoActivity.btDevice, handler = new SocketHandler());
+                    if (!BluetoothHelper.connect() || !handler.init(bitmap))
+                    {
+                        Toast.makeText(DemoActivity.this,"程序出错",Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                }
+            });
         }else{
             Toast.makeText(this,"输入url",Toast.LENGTH_LONG).show();
         }
@@ -157,7 +188,6 @@ public class DemoActivity extends AppCompatActivity {
             int w = bmp.getWidth(); // Picture with
             int h = bmp.getHeight();// Picture height
             int epdInd = EPaperDisplay.epdInd;
-            Log.e("zkh",epdInd+ "===");
             array = new int[w*h]; // Array of pixels
             int i = 0;            // Index of pixel in the array of pixels
 
