@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        style="@style/mchV">
+
+        <Button
+            style="@style/btn"
+            android:text="@string/scan"
+            android:onClick="onScan"/>
+
+        <TextView
+            style="@style/txt"
+            android:id="@+id/text_blue"
+            android:text="@string/no_blue"/>
+
+        <View
+            style="@style/sepL"/>
+
+        <EditText
+            android:id="@+id/ed_url"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:hint="URL:"
+            android:ellipsize="end"/>
+
+        <TextView
+            android:id="@+id/upload_text"
+            android:text="Uploading"
+            android:textSize="30dp"
+            android:textAlignment="center"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.0"/>
+
+        <Button
+            style="@style/btn"
+            android:id="@+id/btn_update_image"
+            android:text="Update QR Image"
+            android:textAllCaps="false"
+            android:onClick="onUpdateQRImage"/>
+
+    </LinearLayout>
+
+
+
+</ScrollView>

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,7 +94,7 @@ public class BluetoothHelper
         //-----------------------------------------------------
         btThread = new ConnectedThread(btSocket, btHandler);
         btThread.start();
-
+        Log.e("zkh", "start:");
         return true;
     }
 

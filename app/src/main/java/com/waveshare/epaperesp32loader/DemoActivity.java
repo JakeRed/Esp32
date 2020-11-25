@@ -1,98 +1,130 @@
 package com.waveshare.epaperesp32loader;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.waveshare.epaperesp32loader.communication.BluetoothHelper;
 import com.waveshare.epaperesp32loader.image_processing.EPaperDisplay;
 
 import util.QRCodeUtil;
 
-/**
- * <h1>Upload activity</h1>
- * The activity shows the progress of image uploading into display
- * of the selected bluetooth device.
- *
- * @author  Waveshare team
- * @version 1.0
- * @since   8/20/2018
- */
-
-public class UploadActivity extends AppCompatActivity
-{
-    private TextView textView;
-    private SocketHandler handler;
+public class DemoActivity extends AppCompatActivity {
+    public static final int REQ_BLUETOOTH_CONNECTION = 2;
+    public static BluetoothDevice btDevice;
+    private TextView text_blue;
+    private EditText ed_url;
+    @Nullable
     private Bitmap bitmap;
+    private SocketHandler handler;
+    private TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.upload_activity);
-        getSupportActionBar().setTitle(R.string.dlg_send);
-
-        // View
-        //--------------------------------------
+        setContentView(R.layout.app_demo_activity);
+        text_blue = findViewById(R.id.text_blue);
+        ed_url = findViewById(R.id.ed_url);
         textView = findViewById(R.id.upload_text);
         textView.setText("Uploading: 0%");
-        Log.e("zkh", "welcome");
-
-        // Bluetooth helper and its handler
-        //--------------------------------------
-        EPaperDisplay epd = EPaperDisplay.getDisplays()[EPaperDisplay.epdInd];
-        bitmap = QRCodeUtil.Create2DCode("http://www.ymt.com",epd.width,epd.height);
-        Log.e("zkh", "btDevice:" + DemoActivity.btDevice.getName());
-        BluetoothHelper.initialize(DemoActivity.btDevice, handler = new SocketHandler());
+        EPaperDisplay.epdInd = 14;
+        ed_url.setText(EPaperDisplay.getDisplays()[EPaperDisplay.epdInd].title);
     }
+
+    /**
+     * 扫描
+     * @param view
+     */
+    public void onScan(View view)
+    {
+        startActivityForResult(
+                new Intent(this, ScanningActivity.class),
+                REQ_BLUETOOTH_CONNECTION);
+    }
+
+    /**
+     * 上传
+     */
+    public void onUpdateQRImage(View view) {
+        String result = ed_url.getText().toString();
+        if (!TextUtils.isEmpty(result)){
+            EPaperDisplay epd = EPaperDisplay.getDisplays()[EPaperDisplay.epdInd];
+            bitmap = QRCodeUtil.Create2DCode(result,epd.width,epd.height);
+            BluetoothHelper.initialize(DemoActivity.btDevice, handler = new SocketHandler());
+            if (!BluetoothHelper.connect() || !handler.init(bitmap))
+            {
+                Toast.makeText(this,"程序出错",Toast.LENGTH_LONG).show();
+                return;
+            }
+        }else{
+            Toast.makeText(this,"输入url",Toast.LENGTH_LONG).show();
+        }
+    }
+
 
     @Override
     protected void onResume()
     {
         super.onResume();
-        if (!BluetoothHelper.connect() || !handler.init(bitmap))
-        {
-            setResult(RESULT_CANCELED);
-            finish();
-        }
-        textView.setText("Uploading 0 %");
     }
 
     @Override
     protected void onPause()
     {
-        BluetoothHelper.close();
+        if (handler != null){
+            BluetoothHelper.close();
+        }
         super.onPause();
     }
 
     @Override
     protected void onDestroy()
     {
-        BluetoothHelper.close();
+        if (handler != null){
+            BluetoothHelper.close();
+        }
         super.onDestroy();
     }
 
     @Override
     public void onBackPressed()
     {
-        BluetoothHelper.close();
-        setResult(RESULT_OK);
-        finish();
+        if (handler != null){
+            BluetoothHelper.close();
+        }
     }
 
     public void onCancel(View view)
     {
         onBackPressed();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == REQ_BLUETOOTH_CONNECTION)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                btDevice = data.getParcelableExtra("DEVICE");
+                text_blue.setText(btDevice.getName() + " (" + btDevice.getAddress() + ")");
+            }
+        }
     }
 
     // Uploaded data buffer
@@ -464,9 +496,4 @@ public class UploadActivity extends AppCompatActivity
     }
 
 
-    public static Intent getIntent2Me(Context context,String content) {
-        Intent intent = new Intent(context,UploadActivity.class);
-        intent.putExtra("url", content);
-        return intent;
-    }
 }
